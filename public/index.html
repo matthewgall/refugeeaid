@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SOS Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <noscript>
+        <div class="no-js-message">
+            This form requires JavaScript to work properly. Please enable JavaScript in your browser settings and refresh the page.
+        </div>
+    </noscript>
+
+    <h1>SOS Form</h1>
+
+    <div id="loadingSpinner" style="display: none;">
+        <img src="{{ url_for('static', filename='spinner.gif') }}" alt="Loading..." width="50">
+        <p>Fetching your location and sending request...</p>
+    </div>
+
+    <form id="sosForm" enctype="multipart/form-data">
+        <input id="firstName" type="text" placeholder="Your first name" name="firstName">
+        <input id="lastName" type="text" placeholder="Your last name" name="lastName">
+        <div id="othersName">
+            <button id="add_user_btn" type="button">Add another family member</button>
+        </div>
+        <input id="email" type="email" placeholder="Your email" name="email">
+        <input id="phoneNumber" type="tel" placeholder="Your phone number" name="phoneNumber">
+        <textarea id="locationDescription" placeholder="Describe your location, add a persistent pin drop link or google location link" name="locationDescription"></textarea>
+
+        <div id="photoSection">
+            <button id="add_photos_btn" type="button">Add Photos</button>
+        </div>
+
+        <select id="needSelect" onchange="displayOtherNeedField()" name="need">
+            <option value="">I need...</option>
+            <option value="Evacuation">Evacuation</option>
+            <option value="Medical Help">Medical Help</option>
+            <option value="Other">Other</option>
+        </select>
+        <textarea id="otherNeed" style="display: none;" placeholder="Describe your need" name="otherNeed"></textarea>
+        <label for="usCitizen">Are you a US Citizen?</label>
+        <select id="usCitizen" required name="usCitizen">
+            <option value="">Select...</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+        <button type="submit">Request SOS</button>
+    </form>
+
+    <script>
+        let userCount = 0;
+        let photoCount = 0;
+
+        document.getElementById('add_user_btn').addEventListener('click', addFamilyMemberField);
+        document.getElementById('add_photos_btn').addEventListener('click', addPhotoField);
+
+        function addFamilyMemberField() {
+            let newInput = document.createElement('input');
+            newInput.setAttribute('type', 'text');
+            newInput.id = 'user' + userCount;
+            newInput.name = 'othersName[]';
+            newInput.placeholder = 'Full Names of others with you';
+            let removeBtn = createRemoveButton();
+            let newDiv = document.createElement('div');
+            newDiv.classList.add('others-name');
+            newDiv.appendChild(newInput);
+            newDiv.appendChild(removeBtn);
+            document.getElementById('othersName').insertBefore(newDiv, document.getElementById('add_user_btn'));
+            userCount++;
+        }
+
+        function addPhotoField() {
+            let fileInput = document.createElement('input');
+            fileInput.setAttribute('type', 'file');
+            fileInput.id = 'photo' + photoCount;
+            fileInput.name = 'photos';
+            let removeBtn = createRemoveButton();
+            let newDiv = document.createElement('div');
+            newDiv.classList.add('photo-input');
+            newDiv.appendChild(fileInput);
+            newDiv.appendChild(removeBtn);
+            document.getElementById('photoSection').insertBefore(newDiv, document.getElementById('add_photos_btn'));
+            photoCount++;
+        }
+
+        function createRemoveButton() {
+            let removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.setAttribute('type', 'button');
+            removeBtn.classList.add('remove-btn');
+            removeBtn.onclick = function() {
+                this.parentNode.remove();
+            };
+            return removeBtn;
+        }
+
+        document.querySelector('#sosForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            document.querySelector('#loadingSpinner').style.display = 'block';
+            getGeoLocation();
+        });
+
+        function displayOtherNeedField() {
+            if (document.querySelector('#needSelect').value === 'Other') {
+                document.querySelector('#otherNeed').style.display = 'block';
+            } else {
+                document.querySelector('#otherNeed').style.display = 'none';
+            }
+        }
+
+        function getGeoLocation() {
+            if (!("geolocation" in navigator)) {
+                console.error('Geolocation not supported');
+                sendDataToServer('Location not supported', 'Location not supported');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+                console.log('Geolocation success', latitude, longitude);
+                sendDataToServer(latitude, longitude);
+            }, function(error) {
+                console.error('Geolocation error', error);
+                sendDataToServer('Location not retrieved', 'Location not retrieved');
+            }, {
+                timeout: 10000,  // 10 seconds
+                enableHighAccuracy: true
+            });
+        }
+
+        function sendDataToServer(latitude, longitude) {
+            const formData = new FormData(document.getElementById("sosForm"));
+            formData.append("latitude", latitude);
+            formData.append("longitude", longitude);
+
+            fetch('/endpoint', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(res => {
+                document.querySelector('#loadingSpinner').style.display = 'none';
+                if (res.status === "Success") {
+                    alert("Your information was sent successfully. Please be safe and wait for a response.");
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 3000);
+                } else {
+                    alert("There was a problem sending your information. Please stay safe.");
+                }
+            })
+            .catch(error => {
+                document.querySelector('#loadingSpinner').style.display = 'none';
+                alert("There was an error sending your information. Please stay safe.");
+            });
+        }
+    </script>
+</body>
+</html>
