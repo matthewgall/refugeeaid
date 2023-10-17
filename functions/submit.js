@@ -1,4 +1,4 @@
-import isUUID from 'validator/lib/isUUID';
+import {nanoid} from 'nanoid';
 
 export async function handle({ request, env }) {
     let resp = {
@@ -37,6 +37,19 @@ export async function handle({ request, env }) {
     if (latitude == 'Location not retrieved') latitude = null
     if (longitude == 'Location not retrieved') longitude = null
 
+    // And get ready to upload our files
+    let photos = formData.get('photos', null);
+    if (photos) {
+        for (let p in photos) {
+            // We are ready to upload them, but what we need to do it store them securely at an un-guessable path
+            let uuid = nanoid();
+
+            // Now, we prepare an upload
+            let r2 = await env.R2.put(uuid, p);
+        }
+    }
+    // Ready to insert into D1
+    
     // And we did it, so return a success response
     resp.success = true;
     return new Response(JSON.stringify(resp), {headers: {'Content-Type': 'application/json'}});
