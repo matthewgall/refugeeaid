@@ -42,7 +42,9 @@ export async function handle({ request, env }) {
     if (photos) {
         for (let i = 0; i < photos.length; i++) {
             let uuid = nanoid();
-            let data = await photos.item(i).arrayBuffer;
+            let data = await photos[i].arrayBuffer();
+
+            console.log(photos[i].name)
 
             await env.R2.put(uuid, data);
         }
