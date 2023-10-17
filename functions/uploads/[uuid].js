@@ -11,10 +11,10 @@ export async function handle({ request, env }) {
         r2.writeHttpMetadata(headers);
     }
     catch(e) {
-        Data = null
+        data = null
     }
     
-    if (Data == null) {
+    if (data == null) {
         return new Response('Image not found. Please check and try again', {
             status: 404,
             headers: {
