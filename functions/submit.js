@@ -25,7 +25,9 @@ export async function handle({ request, env }) {
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
 
-    console.log(formData.keys())
+    for (let k of formData.keys()) {
+        console.log(`${k}: ${formData.get(k)}`)
+    }
 
     // Check for location data
     let latitude = formData.get('latitude') || null
