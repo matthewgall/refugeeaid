@@ -1,13 +1,14 @@
 export async function handle({ request, env }) {
     let image = new URL(request.url).pathname.replace('/uploads/', '').toLowerCase().trim();
 
-    let Data;
-    let DataMetadata = {};
+    let data;
+    let headers;
     try {
         let r2 = await env.R2.get(image);
-        Data = await r2.blob();
+        data = await r2.blob();
 
-        DataMetadata.mime = r2.contentType;
+        headers = new Headers();
+        r2.writeHttpMetadata(headers);
     }
     catch(e) {
         Data = null
@@ -22,10 +23,8 @@ export async function handle({ request, env }) {
         })
     }
 
-    return new Response(Data, {
-        headers: {
-            'Content-Type': DataMetadata.mime
-        }
+    return new Response(data, {
+        headers: headers
     });
 }
 
