@@ -38,16 +38,26 @@ export async function handle({ request, env }) {
     if (longitude == 'Location not retrieved') longitude = null
 
     // And get ready to upload our files
+    let files = [];
     let photos = formData.get('photos', null);
     if (photos) {
-        for (let i = 0; i < photos.length; i++) {
-            let uuid = nanoid();
-            let data = await photos[i].arrayBuffer();
-
-            console.log(photos[i].name)
-
-            await env.R2.put(uuid, data);
+        if (photos.length > 0) {
+            // We have to iterate through them and save
+            for (let f of photos) {
+                let uuid = nanoid();
+                let data = await f.arrayBuffer();
+                await env.R2.put(uuid, data);
+                files.push(uuid);
+            }
         }
+        else {
+            // Otherwise, we can just save the one
+            let uuid = nanoid();
+            let data = await photos.arrayBuffer();
+            await env.R2.put(uuid, data);
+            files.push(uuid)
+        }
+        console.log(files);
     }
     // Ready to insert into D1
 
