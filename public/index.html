@@ -145,7 +145,7 @@
             .then(response => response.json())
             .then(res => {
                 document.querySelector('#loadingSpinner').style.display = 'none';
-                if (res.status === "Success") {
+                if (res.success) {
                     alert("Your information was sent successfully. Please be safe and wait for a response.");
                     setTimeout(() => {
                         window.location.href = "/";
