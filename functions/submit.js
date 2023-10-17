@@ -12,8 +12,9 @@ export async function handle({ request, env }) {
     }
 
     // Now they're out the way, we check for formdata
+    let formData;
     try {
-        let formData = await request.formData();
+        formData = await request.formData();
         if (!formData) {
             resp.message = `No formData was provided`
             return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
