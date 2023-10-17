@@ -1,0 +1,6 @@
+name = "refugeeaid"
+
+[[ d1_databases ]]
+binding = "DB"
+database_name = "refugeeaid"
+database_id = "a1b8b327-fac4-431f-99f2-a45813ba6817"
