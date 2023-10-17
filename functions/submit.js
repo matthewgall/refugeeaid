@@ -19,6 +19,13 @@ export async function handle({ request, env }) {
     }
     console.log(formData);
 
+    // Check for location data
+    let latitude = formData.get('latitude') || null
+    let longitude = formData.get('longitude') || null
+
+    if (latitude == 'Location not retrieved') latitude = null
+    if (longitude == 'Location not retrieved') longitude = null
+
     // And we did it, so return a success response
     resp.success = true;
     return new Response(JSON.stringify(resp), {headers: {'Content-Type': 'application/json'}});
