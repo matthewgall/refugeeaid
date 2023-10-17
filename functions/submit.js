@@ -24,7 +24,7 @@ export async function handle({ request, env }) {
         resp.message = e.message
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
-    console.log(formData);
+    console.log(JSON.stringify(formData));
 
     // Check for location data
     let latitude = formData.get('latitude') || null
