@@ -45,11 +45,11 @@ export async function handle({ request, env }) {
             let uuid = nanoid();
 
             // Now, we prepare an upload
-            let r2 = await env.R2.put(uuid, p);
+            let r2 = await env.R2.put(uuid, p.arrayBuffer);
         }
     }
     // Ready to insert into D1
-    
+
     // And we did it, so return a success response
     resp.success = true;
     return new Response(JSON.stringify(resp), {headers: {'Content-Type': 'application/json'}});
