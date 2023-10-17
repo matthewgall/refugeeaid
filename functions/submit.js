@@ -6,7 +6,7 @@ export async function handle({ request, env }) {
     }
 
     // This endpoint supports POST only
-    if (!request.method == 'POST') {
+    if (request.method !== 'POST') {
         resp.message = `${request.method} is not allowed on this endpoint`
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
