@@ -1,0 +1,11 @@
+{
+    "name": "refugeeaid",
+    "version": "2023.10.0",
+    "description": "a cloudflare worker for assisting in refugee location and assistance efforts",
+    "author": "Matthew Gall <me@matthewgall.dev>",
+    "license": "MIT",
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20231016.0",
+        "wrangler": "^3.13.1"
+    }
+}
