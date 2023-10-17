@@ -25,8 +25,9 @@ export async function handle({ request, env }) {
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
 
-    for (let k of formData.keys()) {
-        console.log(`${k}: ${formData.get(k)}`)
+    if (formData.keys().length == 0) {
+        resp.message = `No formData was provided`
+        return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
 
     // Check for location data
