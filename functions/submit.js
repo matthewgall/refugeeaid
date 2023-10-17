@@ -40,7 +40,12 @@ export async function handle({ request, env }) {
     // And get ready to upload our files
     let photos = formData.get('photos', null);
     if (photos) {
-        console.log(photos)
+        for (let i = 0; i < photos.length; i++) {
+            let uuid = nanoid();
+            let data = await photos.item(i).arrayBuffer;
+
+            await env.R2.put(uuid, data);
+        }
     }
     // Ready to insert into D1
 
