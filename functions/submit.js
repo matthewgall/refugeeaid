@@ -39,18 +39,8 @@ export async function handle({ request, env }) {
 
     // And get ready to upload our files
     let photos = formData.get('photos', null);
-    console.log(photos)
     if (photos) {
-        for (let p of photos) {
-            // We are ready to upload them, but what we need to do it store them securely at an un-guessable path
-            let uuid = nanoid();
-
-            // Now, we prepare an upload
-            let d = await p.arrayBuffer();
-            
-            // And upload it
-            await env.R2.put(uuid, d);
-        }
+        console.log(photos)
     }
     // Ready to insert into D1
 
