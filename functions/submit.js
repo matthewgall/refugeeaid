@@ -67,7 +67,7 @@ export async function handle({ request, env }) {
     // Ready to insert into D1
     let query;
     try {
-        query = await env.DB.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)').bind(
+        query = await env.DB.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)').bind(
             formData.get('firstName', ''),
             formData.get('lastName', ''),
             formData.getAll('othersName').join(',') || '',
@@ -79,7 +79,8 @@ export async function handle({ request, env }) {
             formData.get('usCitizen', 'No'),
             latitude,
             longitude,
-            files.join(',')
+            files.join(','),
+            Math.floor(new Date().getTime() / 1000)
         ).run()
     }
     catch(e) {
@@ -91,6 +92,34 @@ export async function handle({ request, env }) {
     if (query.success) {
         resp.message = `We encountered an error while inserting data into our database. Please try again later`
         return new Response(JSON.stringify(resp), {status: 500, headers: {'Content-Type': 'application/json'}})
+    }
+
+    // Next, if we inserted, and a SLACK_WEBHOOK is set, we can notify Slack
+    if (query.success && env.SLACK_WEBHOOK) {
+        let slackBody = `*Date (UTC)*: {current_utc_time}
+*First Name*: {data.get('firstName')}
+*Last Name*: {data.get('lastName')}
+*Other Names*: {sos_request.others_name}
+*Email*: {data.get('email')}
+*Phone Number*: {data.get('phoneNumber')}
+*Location Description*: {data.get('locationDescription')}
+*Need*: {data.get('need')}
+*Other Need*: {data.get('otherNeed')}
+*US Citizen*: {data.get('usCitizen')}
+*Location*: {location_display}
+*Photo URLs*: {' , '.join(file_urls)}
+`
+
+        let slack = await fetch(env.SLACK_WEBHOOK, {
+            method: 'POST',
+            headers: {
+                'User-Agent': 'refugeeaid/worker'
+            },
+            body: JSON.stringify({'text': slackBody})
+        })
+        if (!slack.ok) {
+            console.log()
+        }
     }
 
     // And we did it, so return a success response
