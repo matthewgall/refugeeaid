@@ -111,7 +111,7 @@ export async function handle({ request, env }) {
             file_display = `https://refugeeaid-pages.pages.dev/uploads/${f}`
         }
 
-        let slackBody = `*Date (UTC)*: ${current_utc_time}
+        let slackBody = `*Date (UTC)*: ${new Date(submission_time).toISOString()}
 *First Name*: ${formData.get('firstName', '')}
 *Last Name*: ${formData.get('lastName', '')}
 *Other Names*: ${formData.getAll('othersName').join(',') || ''}
