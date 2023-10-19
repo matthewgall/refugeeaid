@@ -39,23 +39,14 @@ export async function handle({ request, env }) {
 
     // And get ready to upload our files
     let files = [];
-    let photos = formData.get('photos', null);
+    let photos = formData.getAll('photos', null);
     if (photos) {
-        if (photos.length > 0) {
+        for(let p of photos) {
             // We have to iterate through them and save
-            for (let f of photos) {
-                let uuid = nanoid();
-                let data = await f.arrayBuffer();
-                await env.R2.put(uuid, data);
-                files.push(uuid);
-            }
-        }
-        else {
-            // Otherwise, we can just save the one
             let uuid = nanoid();
-            let data = await photos.arrayBuffer();
+            let data = await f.arrayBuffer();
             await env.R2.put(uuid, data);
-            files.push(uuid)
+            files.push(uuid);
         }
         console.log(files);
     }
