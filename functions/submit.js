@@ -44,7 +44,7 @@ export async function handle({ request, env }) {
         for(let p of photos) {
             // We have to iterate through them and save
             let uuid = nanoid();
-            let data = await f.arrayBuffer();
+            let data = await p.arrayBuffer();
             await env.R2.put(uuid, data);
             files.push(uuid);
         }
