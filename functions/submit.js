@@ -1,4 +1,5 @@
 import {nanoid} from 'nanoid';
+import isEmail from 'validator/lib/isEmail';
 
 export async function handle({ request, env }) {
     let resp = {
@@ -37,10 +38,23 @@ export async function handle({ request, env }) {
     if (latitude == 'Location not retrieved') latitude = null
     if (longitude == 'Location not retrieved') longitude = null
 
+    // Do some content type checks
+    let email = formData.get('email', null)
+    if (email !== null && !isEmail(email)) {
+        resp.message = `You provided an e-mail address that is invalid`
+        return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
+    }
+
     // And get ready to upload our files
     let files = [];
-    let photos = formData.getAll('photos', null);
-    if (photos) {
+    let photos = formData.getAll('photos', []);
+    if (photos.length < 0) {
+        // We allow at maximum 5 photos
+        if (photos.length >= 5) {
+            resp.message = `You provided too many images, please upload a maximum of 5 images only`
+            return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
+        }
+
         for(let p of photos) {
             // We have to iterate through them and save
             let uuid = nanoid();
@@ -48,12 +62,27 @@ export async function handle({ request, env }) {
             await env.R2.put(uuid, data);
             files.push(uuid);
         }
-        console.log(files);
     }
+
     // Ready to insert into D1
+    let query = await db.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)').bind(
+        formData.get('firstName', ''),
+        formData.get('lastName', ''),
+        formData.getAll('othersName').join(',') || '',
+        email,
+        formData.get('phoneNumber', ''),
+        formData.get('locationDescription', ''),
+        formData.get('need', ''),
+        formData.get('otherNeed', ''),
+        formData.get('usCitizen', 'No'),
+        latitude,
+        longitude,
+        files.join(',')
+    ).run()
 
     // And we did it, so return a success response
     resp.success = true;
+    resp.db = query;
     return new Response(JSON.stringify(resp), {headers: {'Content-Type': 'application/json'}});
 }
 
