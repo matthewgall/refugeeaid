@@ -1,5 +1,5 @@
 export async function handle({ request, env }) {
-    let image = new URL(request.url).pathname.replace('/uploads/', '').toLowerCase().trim();
+    let image = new URL(request.url).pathname.replace('/uploads/', '').trim();
 
     let data;
     let headers;
