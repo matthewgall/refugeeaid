@@ -108,7 +108,7 @@ export async function handle({ request, env }) {
 
         let file_display = []
         for (let f of files) {
-            file_display = `https://refugeeaid-pages.pages.dev/uploads/${f}`
+            file_display.push(`https://refugeeaid-pages.pages.dev/uploads/${f}`)
         }
 
         let slackBody = `*Date (UTC)*: ${new Date(submission_time * 1e3).toISOString()}
