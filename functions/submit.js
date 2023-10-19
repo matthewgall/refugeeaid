@@ -65,24 +65,37 @@ export async function handle({ request, env }) {
     }
 
     // Ready to insert into D1
-    let query = await env.DB.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)').bind(
-        formData.get('firstName', ''),
-        formData.get('lastName', ''),
-        formData.getAll('othersName').join(',') || '',
-        email,
-        formData.get('phoneNumber', ''),
-        formData.get('locationDescription', ''),
-        formData.get('need', ''),
-        formData.get('otherNeed', ''),
-        formData.get('usCitizen', 'No'),
-        latitude,
-        longitude,
-        files.join(',')
-    ).run()
+    let query;
+    try {
+        query = await env.DB.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)').bind(
+            formData.get('firstName', ''),
+            formData.get('lastName', ''),
+            formData.getAll('othersName').join(',') || '',
+            email,
+            formData.get('phoneNumber', ''),
+            formData.get('locationDescription', ''),
+            formData.get('need', ''),
+            formData.get('otherNeed', ''),
+            formData.get('usCitizen', 'No'),
+            latitude,
+            longitude,
+            files.join(',')
+        ).run()
+    }
+    catch(e) {
+        resp.message = `We encountered an error while inserting data into our database. Please try again later`
+        return new Response(JSON.stringify(resp), {status: 500, headers: {'Content-Type': 'application/json'}})
+    }
+
+    // Check if the insertion was successful
+    if (query.success) {
+        resp.message = `We encountered an error while inserting data into our database. Please try again later`
+        return new Response(JSON.stringify(resp), {status: 500, headers: {'Content-Type': 'application/json'}})
+    }
 
     // And we did it, so return a success response
     resp.success = true;
-    resp.db = query;
+    resp.message = "SOS request saved successfully";
     return new Response(JSON.stringify(resp), {headers: {'Content-Type': 'application/json'}});
 }
 
