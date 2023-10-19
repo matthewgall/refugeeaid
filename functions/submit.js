@@ -99,18 +99,30 @@ export async function handle({ request, env }) {
 
     // Next, if we inserted, and a SLACK_WEBHOOK is set, we can notify Slack
     if (query.success && env.SLACK_WEBHOOK) {
-        let slackBody = `*Date (UTC)*: {current_utc_time}
-*First Name*: {data.get('firstName')}
-*Last Name*: {data.get('lastName')}
-*Other Names*: {sos_request.others_name}
-*Email*: {data.get('email')}
-*Phone Number*: {data.get('phoneNumber')}
-*Location Description*: {data.get('locationDescription')}
-*Need*: {data.get('need')}
-*Other Need*: {data.get('otherNeed')}
-*US Citizen*: {data.get('usCitizen')}
-*Location*: {location_display}
-*Photo URLs*: {' , '.join(file_urls)}
+        let google_maps_link = "None"
+        let location_display = "None"
+        if (latitude && longitude) {
+            google_maps_link = `https://www.google.com/maps/search/${latitude},${longitude}`
+            location_display = `<${google_maps_link}|Map> - Latitude: ${latitude}, Longitude: ${longitude}`
+        }
+
+        let file_display = []
+        for (let f of files) {
+            file_display = `https://refugeeaid-pages.pages.dev/uploads/${f}`
+        }
+
+        let slackBody = `*Date (UTC)*: ${current_utc_time}
+*First Name*: ${formData.get('firstName', '')}
+*Last Name*: ${formData.get('lastName', '')}
+*Other Names*: ${formData.getAll('othersName').join(',') || ''}
+*Email*: ${email}
+*Phone Number*: ${formData.get('phoneNumber', '')}
+*Location Description*: ${formData.get('locationDescription', '')}
+*Need*: ${formData.get('need', '')}
+*Other Need*: ${formData.get('otherNeed', '')}
+*US Citizen*: ${formData.get('usCitizen', 'No')}
+*Location*: ${location_display}
+*Photo URLs*: ${file_display.join(', ')}
 `
 
         let slack = await fetch(env.SLACK_WEBHOOK, {
