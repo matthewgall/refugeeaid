@@ -53,7 +53,7 @@ export async function handle({ request, env }) {
     let photos = formData.getAll('photos', []);
     if (photos.length > 0) {
         // We allow at maximum 5 photos
-        if (photos.length - 1 < 5) {
+        if (photos.length > 5) {
             resp.message = `You provided too many images, please upload a maximum of 5 images only`
             return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
         }
