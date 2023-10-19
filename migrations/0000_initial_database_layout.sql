@@ -14,5 +14,5 @@ CREATE TABLE SOSRequest (id INTEGER PRIMARY KEY,
     latitude TEXT,
     longitude TEXT,
     photo_urls TEXT,
-    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M','now', 'localtime'))
+    created_at TEXT
 );

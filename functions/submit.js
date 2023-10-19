@@ -31,6 +31,9 @@ export async function handle({ request, env }) {
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
 
+    // Now we record the submission time
+    let submission_time = Math.floor(new Date().getTime() / 1000)
+
     // Check for location data
     let latitude = formData.get('latitude') || null
     let longitude = formData.get('longitude') || null
@@ -67,7 +70,7 @@ export async function handle({ request, env }) {
     // Ready to insert into D1
     let query;
     try {
-        query = await env.DB.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)').bind(
+        query = await env.DB.prepare('INSERT INTO SOSRequest (first_name, last_name, others_name, email, phone_number, location_description, need, other_need, us_citizen, latitude, longitude, photo_urls, created_on) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)').bind(
             formData.get('firstName', ''),
             formData.get('lastName', ''),
             formData.getAll('othersName').join(',') || '',
@@ -79,7 +82,8 @@ export async function handle({ request, env }) {
             formData.get('usCitizen', 'No'),
             latitude,
             longitude,
-            files.join(',')
+            files.join(','),
+            submission_time
         ).run()
     }
     catch(e) {
