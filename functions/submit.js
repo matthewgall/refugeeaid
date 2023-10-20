@@ -121,7 +121,7 @@ export async function handle({ request, env }) {
         }
 
         let file_display = []
-        for (let f of files) {
+        for (let f of submissionData.files) {
             file_display.push(`https://refugeeaid-pages.pages.dev/uploads/${f}`)
         }
 
