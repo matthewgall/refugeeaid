@@ -58,6 +58,11 @@ export async function handle({ request, env }) {
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
     }
 
+    if (!['Yes', 'No'].includes(submissionData.usCitizen)) {
+        resp.message = `You provided an invalid US citizen status`
+        return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
+    }
+
     // And get ready to upload our files
     let photos = formData.getAll('photos', []);
     if (photos.length > 0) {
