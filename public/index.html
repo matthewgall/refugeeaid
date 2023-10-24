@@ -118,6 +118,7 @@
                 sendDataToServer('Location not supported', 'Location not supported');
                 return;
             }
+        
 
             navigator.geolocation.getCurrentPosition(function(position) {
                 var latitude = position.coords.latitude;
@@ -125,18 +126,37 @@
                 console.log('Geolocation success', latitude, longitude);
                 sendDataToServer(latitude, longitude);
             }, function(error) {
-                console.error('Geolocation error', error);
-                sendDataToServer('Location not retrieved', 'Location not retrieved');
+                let errorMessage = 'Geolocation error';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = "User denied the request for Geolocation.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = "Location information is unavailable.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = "The request to get user location timed out.";
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        errorMessage = "An unknown error occurred.";
+                        break;
+                }
+                console.error(errorMessage);
+                sendDataToServer('Location not retrieved', 'Location not retrieved', errorMessage);  // Add the errorMessage as a third parameter
             }, {
                 timeout: 10000,  // 10 seconds
                 enableHighAccuracy: true
             });
         }
 
-        function sendDataToServer(latitude, longitude) {
-            const formData = new FormData(document.getElementById("sosForm"));
-            formData.append("latitude", latitude);
-            formData.append("longitude", longitude);
+            function sendDataToServer(latitude, longitude, geoError = null) {
+                const formData = new FormData(document.getElementById("sosForm"));
+                formData.append("latitude", latitude);
+                formData.append("longitude", longitude);
+                if (geoError) {
+                    formData.append("geoError", geoError);  // Append the geolocation error message to the formData
+                }
+            
 
             fetch('/submit', {
                 method: 'POST',
