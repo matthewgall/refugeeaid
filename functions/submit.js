@@ -126,28 +126,31 @@ export async function handle({ request, env }) {
         }
 
         let slackBody = `*Date (UTC)*: ${new Date(submissionData.createdAt * 1e3).toISOString()}
-*First Name*: ${submissionData.firstName}
-*Last Name*: ${submissionData.lastName}
-*Other Names*: ${submissionData.othersName}
-*Email*: ${submissionData.email}
-*Phone Number*: ${submissionData.phoneNumber}
-*Location Description*: ${submissionData.locationDescription}
-*Need*: ${submissionData.need}
-*Other Need*: ${submissionData.otherNeed}
-*US Citizen*: ${submissionData.usCitizen}
-*Location*: ${location_display}
-*Photo URLs*: ${file_display.join(',')}
-`
+        *First Name*: ${submissionData.firstName}
+        *Last Name*: ${submissionData.lastName}
+        *Other Names*: ${submissionData.othersName}
+        *Email*: ${submissionData.email}
+        *Phone Number*: ${submissionData.phoneNumber}
+        *Location Description*: ${submissionData.locationDescription}
+        *Need*: ${submissionData.need}
+        *Other Need*: ${submissionData.otherNeed}
+        *US Citizen*: ${submissionData.usCitizen}
+        *Location*: ${location_display}
+        *Photo URLs*: ${file_display.join(',')}
+        `
 
-        let slack = await fetch(env.SLACK_WEBHOOK, {
-            method: 'POST',
-            headers: {
-                'User-Agent': 'refugeeaid/worker'
-            },
-            body: JSON.stringify({'text': slackBody})
-        })
-        if (!slack.ok) {
-            console.log()
+        for (let s of env.SLACK_WEBHOOK.split(',')) {
+            let slack = await fetch(s, {
+                method: 'POST',
+                headers: {
+                    'User-Agent': 'refugeeaid/worker'
+                },
+                body: JSON.stringify({'text': slackBody})
+            })
+
+            if (!slack.ok) {
+                console.log(`Encountered an error while posting to SLACK_WEBHOOK: ${e}`)
+            }
         }
     }
 
