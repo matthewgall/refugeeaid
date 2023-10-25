@@ -112,7 +112,7 @@ export async function handle({ request, env }) {
     }
 
     // Next, if we inserted, and a SLACK_WEBHOOK is set, we can notify Slack
-    if (query.success && env.SLACK_WEBHOOK) {
+    if (query.success && (env.SLACK_WEBHOOK || env.GOOGLESCRIPT_WEBHOOK)) {
         let google_maps_link = "None"
         let location_display = "None"
         if (submissionData.latitude && submissionData.longitude) {
@@ -139,19 +139,38 @@ export async function handle({ request, env }) {
         *Photo URLs*: ${file_display.join(',')}
         `
 
-        for (let s of env.SLACK_WEBHOOK.split(',')) {
-            let slack = await fetch(s, {
-                method: 'POST',
-                headers: {
-                    'User-Agent': 'refugeeaid/worker'
-                },
-                body: JSON.stringify({'text': slackBody})
-            })
-
-            if (!slack.ok) {
-                console.log(`Encountered an error while posting to SLACK_WEBHOOK: ${e}`)
+        if (env.SLACK_WEBHOOK) {
+            for (let s of env.SLACK_WEBHOOK.split(',')) {
+                let slack = await fetch(s, {
+                    method: 'POST',
+                    headers: {
+                        'User-Agent': 'refugeeaid/worker'
+                    },
+                    body: JSON.stringify({'text': slackBody})
+                })
+    
+                if (!slack.ok) {
+                    console.log(`Encountered an error while posting to SLACK_WEBHOOK: ${e}`)
+                }
             }
         }
+
+        if (env.GOOGLESCRIPT_WEBHOOK) {
+            for (let g of env.GOOGLESCRIPT_WEBHOOK.split(',')) {
+                let slack = await fetch(s, {
+                    method: 'POST',
+                    headers: {
+                        'User-Agent': 'refugeeaid/worker'
+                    },
+                    body: JSON.stringify({'text': slackBody})
+                })
+    
+                if (!slack.ok) {
+                    console.log(`Encountered an error while posting to GOOGLESCRIPT_WEBHOOK: ${e}`)
+                }
+            }
+        }
+
     }
 
     // And we did it, so return a success response
