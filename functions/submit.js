@@ -52,12 +52,6 @@ export async function handle({ request, env }) {
     if (submissionData.latitude == 'Location not retrieved') submissionData.latitude = null
     if (submissionData.longitude == 'Location not retrieved') submissionData.longitude = null
 
-    // Do some content type checks
-    if (submissionData.email !== null && !isEmail(submissionData.email)) {
-        resp.message = `You provided an e-mail address that is invalid`
-        return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
-    }
-
     if (!['Yes', 'No'].includes(submissionData.usCitizen)) {
         resp.message = `You provided an invalid US citizen status`
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
