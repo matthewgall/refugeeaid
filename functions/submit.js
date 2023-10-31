@@ -52,6 +52,12 @@ export async function handle({ request, env }) {
     if (submissionData.latitude == 'Location not retrieved') submissionData.latitude = null
     if (submissionData.longitude == 'Location not retrieved') submissionData.longitude = null
 
+    // Do some content type checks
+    if (submissionData.email !== null && !isEmail(submissionData.email)) {
+        resp.message = `You provided an e-mail address that is invalid`
+        return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
+    }
+
     if (!['Yes', 'No'].includes(submissionData.usCitizen)) {
         resp.message = `You provided an invalid US citizen status`
         return new Response(JSON.stringify(resp), {status: 400, headers: {'Content-Type': 'application/json'}})
@@ -134,34 +140,30 @@ export async function handle({ request, env }) {
         `
 
         if (env.SLACK_WEBHOOK) {
-            for (let s of env.SLACK_WEBHOOK.split(',')) {
-                let slack = await fetch(s, {
-                    method: 'POST',
-                    headers: {
-                        'User-Agent': 'refugeeaid/worker'
-                    },
-                    body: JSON.stringify({'text': slackBody})
-                })
-    
-                if (!slack.ok) {
-                    console.log(`Encountered an error while posting to SLACK_WEBHOOK: ${e}`)
-                }
+            let slack = await fetch(s, {
+                method: 'POST',
+                headers: {
+                    'User-Agent': 'refugeeaid/worker'
+                },
+                body: JSON.stringify({'text': slackBody})
+            })
+
+            if (!slack.ok) {
+                console.log(`Encountered an error while posting to SLACK_WEBHOOK: ${e}`)
             }
         }
 
         if (env.GOOGLESCRIPT_WEBHOOK) {
-            for (let g of env.GOOGLESCRIPT_WEBHOOK.split(',')) {
-                let slack = await fetch(s, {
-                    method: 'POST',
-                    headers: {
-                        'User-Agent': 'refugeeaid/worker'
-                    },
-                    body: JSON.stringify({'text': slackBody})
-                })
-    
-                if (!slack.ok) {
-                    console.log(`Encountered an error while posting to GOOGLESCRIPT_WEBHOOK: ${e}`)
-                }
+            let slack = await fetch(s, {
+                method: 'POST',
+                headers: {
+                    'User-Agent': 'refugeeaid/worker'
+                },
+                body: JSON.stringify({'text': slackBody})
+            })
+
+            if (!slack.ok) {
+                console.log(`Encountered an error while posting to GOOGLESCRIPT_WEBHOOK: ${e}`)
             }
         }
 
