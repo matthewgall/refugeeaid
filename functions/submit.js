@@ -140,7 +140,7 @@ export async function handle({ request, env }) {
         `
 
         if (env.SLACK_WEBHOOK) {
-            let slack = await fetch(s, {
+            let slack = await fetch(env.SLACK_WEBHOOK, {
                 method: 'POST',
                 headers: {
                     'User-Agent': 'refugeeaid/worker'
@@ -154,7 +154,7 @@ export async function handle({ request, env }) {
         }
 
         if (env.GOOGLESCRIPT_WEBHOOK) {
-            let slack = await fetch(s, {
+            let slack = await fetch(env.GOOGLESCRIPT_WEBHOOK, {
                 method: 'POST',
                 headers: {
                     'User-Agent': 'refugeeaid/worker'
